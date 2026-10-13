@@ -1,53 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>{{ title }}</title>
-  <link rel="stylesheet" href="/static/styles.css" />
+  <link rel="stylesheet" href="/static/styles.css"/>
 </head>
 <body>
-  <main>
-    <h1>{{ title }}</h1>
-    <p class="sub">{{ description }} · LLM <span class="pill">{{ llm_mode }}</span></p>
-    <div class="grid">
-      <section class="card">
-        <h2>Create memory</h2>
-        <form method="post" action="/ui/create">
-        <label>ticket_id</label><input name="ticket_id" placeholder="ticket_id" required />
-<label>resolution</label><input name="resolution" placeholder="resolution" required />
-<label>tags</label><input name="tags" placeholder="tags" required />
-          <button type="submit">Save</button>
-        </form>
-        <h2 style="margin-top:1.25rem">AI action: {{ action }}</h2>
-        <p class="sub">{{ action_desc }}</p>
-        <form method="post" action="/ui/action">
-          <label>prompt</label>
-          <textarea name="prompt" rows="4" placeholder="Describe what you need..."></textarea>
-          <button type="submit">Run {{ action }}</button>
-        </form>
-        {% if last_result %}
-        <h3>Last result</h3>
-        <pre>{{ last_result }}</pre>
-        {% endif %}
-      </section>
-      <section class="card">
-        <h2>{{ resource }} ({{ items|length }})</h2>
-        <table>
-          <thead><tr><th>id</th><th>data</th></tr></thead>
-          <tbody>
-          {% for item in items %}
-            <tr>
-              <td>{{ item.id }}</td>
-              <td><code>{{ item }}</code></td>
-            </tr>
-          {% else %}
-            <tr><td colspan="2">No items yet</td></tr>
-          {% endfor %}
-          </tbody>
-        </table>
-      </section>
-    </div>
-  </main>
+<main>
+  <h1>{{ title }}</h1>
+  <p class="sub">Index resolved tickets, then draft replies from similar memory.</p>
+  <div class="grid">
+    <section class="card">
+      <h2>Index past ticket</h2>
+      <form method="post" action="/ui/tickets">
+        <label>Subject</label><input name="subject" required/>
+        <label>Tags</label><input name="tags" placeholder="auth,mfa"/>
+        <label>Body</label><textarea name="body" rows="4" required></textarea>
+        <label>Resolution</label><textarea name="resolution" rows="4"></textarea>
+        <button type="submit">Save to memory</button>
+      </form>
+    </section>
+    <section class="card">
+      <h2>Assist live ticket</h2>
+      <form method="post" action="/ui/assist">
+        <label>Subject</label><input name="subject" value="{{ subject or '' }}" required/>
+        <label>Body</label><textarea name="body" rows="5" required>{{ body or '' }}</textarea>
+        <button type="submit">Find similar &amp; draft</button>
+      </form>
+      {% if draft %}
+        <h3>Draft reply</h3><pre>{{ draft }}</pre>
+        <h3>Similar cases</h3>
+        {% for s in similar %}
+          <article class="card" style="margin:.5rem 0">
+            <span class="pill">{{ s.score }}</span> {{ s.subject }}
+            <div class="sub">{{ s.resolution }}</div>
+          </article>
+        {% endfor %}
+      {% endif %}
+      <h3>Memory ({{ tickets|length }})</h3>
+      <ul>
+      {% for t in tickets %}
+        <li><span class="pill">{{ t.tags or 'untagged' }}</span> {{ t.subject }}</li>
+      {% endfor %}
+      </ul>
+    </section>
+  </div>
+</main>
 </body>
 </html>
