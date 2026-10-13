@@ -1,0 +1,14 @@
+{
+  "project": "ticket-memory-rag",
+  "resource": "memories",
+  "samples": [
+    {
+      "id": "tm1",
+      "ticket_id": "42",
+      "resolution": "Reset MFA",
+      "tags": [
+        "auth"
+      ]
+    }
+  ]
+}
